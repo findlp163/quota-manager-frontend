@@ -142,4 +142,37 @@ export const systemApi = {
   // 移除了健康检查功能
 }
 
+// 模型白名单相关API
+export const modelPermissionApi = {
+  // 查询用户模型白名单
+  getUserWhitelist(userId) {
+    return api.get(getApiUrl('/model-permissions/user'), {
+      params: { user_id: userId }
+    })
+  },
+
+  // 设置用户模型白名单
+  setUserWhitelist(userId, models = []) {
+    return api.post(getApiUrl('/model-permissions/user'), {
+      user_id: userId,
+      models
+    })
+  },
+
+  // 查询部门模型白名单
+  getDepartmentWhitelist(departmentName) {
+    return api.get(getApiUrl('/model-permissions/department'), {
+      params: { department_name: departmentName }
+    })
+  },
+
+  // 设置部门模型白名单
+  setDepartmentWhitelist(departmentName, models = []) {
+    return api.post(getApiUrl('/model-permissions/department'), {
+      department_name: departmentName,
+      models
+    })
+  }
+}
+
 export default api

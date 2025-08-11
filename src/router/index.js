@@ -5,6 +5,7 @@ const Dashboard = () => import('@/views/Dashboard.vue')
 const StrategyList = () => import('@/views/StrategyList.vue')
 const StrategyDetail = () => import('@/views/StrategyDetail.vue')
 const UserAudit = () => import('@/views/UserAudit.vue')
+const ModelWhitelist = () => import('@/views/ModelWhitelist.vue')
 const Settings = () => import('@/views/Settings.vue')
 
 const routes = [
@@ -29,6 +30,12 @@ const routes = [
     name: 'StrategyDetail',
     component: StrategyDetail,
     meta: { title: 'Strategy Detail' }
+  },
+  {
+    path: '/model-permissions',
+    name: 'ModelWhitelist',
+    component: ModelWhitelist,
+    meta: { title: 'Model Whitelist' }
   },
   {
     path: '/user-audit',

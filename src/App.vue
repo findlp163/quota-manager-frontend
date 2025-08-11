@@ -22,6 +22,10 @@
             <el-icon><Document /></el-icon>
             <span>Strategy Management</span>
           </el-menu-item>
+          <el-menu-item index="/model-permissions">
+            <el-icon><Document /></el-icon>
+            <span>Model Whitelist</span>
+          </el-menu-item>
           <el-menu-item index="/user-audit">
             <el-icon><User /></el-icon>
             <span>User Audit</span>
