@@ -7,6 +7,7 @@ const StrategyDetail = () => import('@/views/StrategyDetail.vue')
 const UserAudit = () => import('@/views/UserAudit.vue')
 const ModelWhitelist = () => import('@/views/ModelWhitelist.vue')
 const StarCheckPermissions = () => import('@/views/StarCheckPermissions.vue')
+const QuotaCheckPermissions = () => import('@/views/QuotaCheckPermissions.vue')
 const Settings = () => import('@/views/Settings.vue')
 
 const routes = [
@@ -43,6 +44,12 @@ const routes = [
     name: 'StarCheckPermissions',
     component: StarCheckPermissions,
     meta: { title: 'Star Check Permissions' }
+  },
+  {
+    path: '/quota-check-permissions',
+    name: 'QuotaCheckPermissions',
+    component: QuotaCheckPermissions,
+    meta: { title: 'Quota Check Permissions' }
   },
   {
     path: '/user-audit',

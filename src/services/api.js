@@ -208,4 +208,37 @@ export const starCheckPermissionApi = {
   }
 }
 
+// Quota Check 权限相关API
+export const quotaCheckPermissionApi = {
+  // 查询用户开启状态
+  getUserQuotaCheckSetting(userId) {
+    return api.get(getApiUrl('/quota-check-permissions/user'), {
+      params: { user_id: userId }
+    })
+  },
+
+  // 设置用户开启状态
+  setUserQuotaCheckSetting(userId, enabled) {
+    return api.post(getApiUrl('/quota-check-permissions/user'), {
+      user_id: userId,
+      enabled
+    })
+  },
+
+  // 查询部门开启状态
+  getDepartmentQuotaCheckSetting(departmentName) {
+    return api.get(getApiUrl('/quota-check-permissions/department'), {
+      params: { department_name: departmentName }
+    })
+  },
+
+  // 设置部门开启状态
+  setDepartmentQuotaCheckSetting(departmentName, enabled) {
+    return api.post(getApiUrl('/quota-check-permissions/department'), {
+      department_name: departmentName,
+      enabled
+    })
+  }
+}
+
 export default api

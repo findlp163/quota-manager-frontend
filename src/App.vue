@@ -30,6 +30,10 @@
             <el-icon><Setting /></el-icon>
             <span>Star Check</span>
           </el-menu-item>
+          <el-menu-item index="/quota-check-permissions">
+            <el-icon><Setting /></el-icon>
+            <span>Quota Check</span>
+          </el-menu-item>
           <el-menu-item index="/user-audit">
             <el-icon><User /></el-icon>
             <span>User Audit</span>
