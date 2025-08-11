@@ -175,4 +175,37 @@ export const modelPermissionApi = {
   }
 }
 
+// Star Check 权限相关API
+export const starCheckPermissionApi = {
+  // 查询用户开启状态
+  getUserStarCheckSetting(userId) {
+    return api.get(getApiUrl('/star-check-permissions/user'), {
+      params: { user_id: userId }
+    })
+  },
+
+  // 设置用户开启状态
+  setUserStarCheckSetting(userId, enabled) {
+    return api.post(getApiUrl('/star-check-permissions/user'), {
+      user_id: userId,
+      enabled
+    })
+  },
+
+  // 查询部门开启状态
+  getDepartmentStarCheckSetting(departmentName) {
+    return api.get(getApiUrl('/star-check-permissions/department'), {
+      params: { department_name: departmentName }
+    })
+  },
+
+  // 设置部门开启状态
+  setDepartmentStarCheckSetting(departmentName, enabled) {
+    return api.post(getApiUrl('/star-check-permissions/department'), {
+      department_name: departmentName,
+      enabled
+    })
+  }
+}
+
 export default api

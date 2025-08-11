@@ -6,6 +6,7 @@ const StrategyList = () => import('@/views/StrategyList.vue')
 const StrategyDetail = () => import('@/views/StrategyDetail.vue')
 const UserAudit = () => import('@/views/UserAudit.vue')
 const ModelWhitelist = () => import('@/views/ModelWhitelist.vue')
+const StarCheckPermissions = () => import('@/views/StarCheckPermissions.vue')
 const Settings = () => import('@/views/Settings.vue')
 
 const routes = [
@@ -36,6 +37,12 @@ const routes = [
     name: 'ModelWhitelist',
     component: ModelWhitelist,
     meta: { title: 'Model Whitelist' }
+  },
+  {
+    path: '/star-check-permissions',
+    name: 'StarCheckPermissions',
+    component: StarCheckPermissions,
+    meta: { title: 'Star Check Permissions' }
   },
   {
     path: '/user-audit',

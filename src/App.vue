@@ -26,6 +26,10 @@
             <el-icon><Document /></el-icon>
             <span>Model Whitelist</span>
           </el-menu-item>
+          <el-menu-item index="/star-check-permissions">
+            <el-icon><Setting /></el-icon>
+            <span>Star Check</span>
+          </el-menu-item>
           <el-menu-item index="/user-audit">
             <el-icon><User /></el-icon>
             <span>User Audit</span>
