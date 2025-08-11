@@ -153,6 +153,10 @@
           </el-select>
         </el-form-item>
 
+        <el-form-item v-if="form.type === 'periodic'" label="Maximum Execution Count" prop="max_exec_per_user">
+          <el-input-number v-model="form.max_exec_per_user" :min="0" :max="1000000" style="width: 100%" />
+        </el-form-item>
+
         <el-form-item label="Amount" prop="amount">
           <el-input-number v-model="form.amount" :min="1" :max="10000" style="width: 100%" />
         </el-form-item>
@@ -407,6 +411,7 @@ const form = reactive({
   model: '',
   condition: '',
   periodic_expr: '',
+  max_exec_per_user: 0,
   status: true
 })
 
@@ -424,6 +429,24 @@ const formRules = {
   amount: [
     { required: true, message: 'Please enter amount', trigger: 'blur' },
     { type: 'number', min: 1, message: 'Amount must be greater than 0', trigger: 'blur' }
+  ],
+  max_exec_per_user: [
+    {
+      validator: (rule, value, callback) => {
+        if (form.type === 'periodic') {
+          if (typeof value !== 'number') {
+            callback(new Error('请输入数字'))
+            return
+          }
+          if (value < 0) {
+            callback(new Error('必须大于等于0'))
+            return
+          }
+        }
+        callback()
+      },
+      trigger: 'change'
+    }
   ],
   condition: [
     { required: true, message: 'Please enter strategy condition', trigger: 'blur' }
@@ -627,6 +650,7 @@ const submitForm = async () => {
 
     if (payload.type === 'single') {
       delete payload.periodic_expr
+      delete payload.max_exec_per_user
     }
     if (!payload.model || payload.model.trim() === '') {
       delete payload.model
@@ -661,6 +685,7 @@ const resetForm = () => {
     model: '',
     condition: '',
     periodic_expr: '',
+    max_exec_per_user: 0,
     status: true
   })
 
