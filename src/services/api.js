@@ -146,9 +146,15 @@ export const systemApi = {
 export const modelPermissionApi = {
   // 查询用户模型白名单
   getUserWhitelist(userId) {
-    return api.get(getApiUrl('/model-permissions/user'), {
-      params: { user_id: userId }
-    })
+    return api.get(getApiUrl('/effective-permissions'), {
+      params: { type: 'model', target_type: 'user', target_identifier: userId }
+    }).then(res => ({
+      ...res,
+      data: {
+        user_id: userId,
+        models: res.data?.models || []
+      }
+    }))
   },
 
   // 设置用户模型白名单
@@ -161,9 +167,15 @@ export const modelPermissionApi = {
 
   // 查询部门模型白名单
   getDepartmentWhitelist(departmentName) {
-    return api.get(getApiUrl('/model-permissions/department'), {
-      params: { department_name: departmentName }
-    })
+    return api.get(getApiUrl('/effective-permissions'), {
+      params: { type: 'model', target_type: 'department', target_identifier: departmentName }
+    }).then(res => ({
+      ...res,
+      data: {
+        department_name: departmentName,
+        models: res.data?.models || []
+      }
+    }))
   },
 
   // 设置部门模型白名单
@@ -179,9 +191,15 @@ export const modelPermissionApi = {
 export const starCheckPermissionApi = {
   // 查询用户开启状态
   getUserStarCheckSetting(userId) {
-    return api.get(getApiUrl('/star-check-permissions/user'), {
-      params: { user_id: userId }
-    })
+    return api.get(getApiUrl('/effective-permissions'), {
+      params: { type: 'star-check', target_type: 'user', target_identifier: userId }
+    }).then(res => ({
+      ...res,
+      data: {
+        user_id: userId,
+        enabled: !!res.data?.enabled
+      }
+    }))
   },
 
   // 设置用户开启状态
@@ -194,9 +212,15 @@ export const starCheckPermissionApi = {
 
   // 查询部门开启状态
   getDepartmentStarCheckSetting(departmentName) {
-    return api.get(getApiUrl('/star-check-permissions/department'), {
-      params: { department_name: departmentName }
-    })
+    return api.get(getApiUrl('/effective-permissions'), {
+      params: { type: 'star-check', target_type: 'department', target_identifier: departmentName }
+    }).then(res => ({
+      ...res,
+      data: {
+        department_name: departmentName,
+        enabled: !!res.data?.enabled
+      }
+    }))
   },
 
   // 设置部门开启状态
@@ -212,9 +236,15 @@ export const starCheckPermissionApi = {
 export const quotaCheckPermissionApi = {
   // 查询用户开启状态
   getUserQuotaCheckSetting(userId) {
-    return api.get(getApiUrl('/quota-check-permissions/user'), {
-      params: { user_id: userId }
-    })
+    return api.get(getApiUrl('/effective-permissions'), {
+      params: { type: 'quota-check', target_type: 'user', target_identifier: userId }
+    }).then(res => ({
+      ...res,
+      data: {
+        user_id: userId,
+        enabled: !!res.data?.enabled
+      }
+    }))
   },
 
   // 设置用户开启状态
@@ -227,9 +257,15 @@ export const quotaCheckPermissionApi = {
 
   // 查询部门开启状态
   getDepartmentQuotaCheckSetting(departmentName) {
-    return api.get(getApiUrl('/quota-check-permissions/department'), {
-      params: { department_name: departmentName }
-    })
+    return api.get(getApiUrl('/effective-permissions'), {
+      params: { type: 'quota-check', target_type: 'department', target_identifier: departmentName }
+    }).then(res => ({
+      ...res,
+      data: {
+        department_name: departmentName,
+        enabled: !!res.data?.enabled
+      }
+    }))
   },
 
   // 设置部门开启状态

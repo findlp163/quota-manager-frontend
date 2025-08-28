@@ -1,11 +1,9 @@
 # Makefile for Quota Manager Frontend
 
 APP_NAME := quota-manager-frontend
-VERSION := 1.0.0
-REGISTRY := crpi-j8wrd0nl8l9v42wd.cn-shenzhen.personal.cr.aliyuncs.com/shenma-ai
-IMAGE := $(REGISTRY)/$(APP_NAME):$(VERSION)
-LATEST_IMAGE := $(REGISTRY)/$(APP_NAME):latest
-NAMESPACE := shenma
+IMAGE_TAG ?= 1.0.0
+REGISTRY ?= crpi-j8wrd0nl8l9v42wd.cn-shenzhen.personal.cr.aliyuncs.com/shenma-ai
+IMAGE := $(REGISTRY)/$(APP_NAME):$(IMAGE_TAG)
 
 .PHONY: help
 help:
@@ -14,6 +12,8 @@ help:
 	@echo "  build            - Build frontend project"
 	@echo "  docker-build     - Build Docker image"
 	@echo "  docker-push      - Push Docker image to registry"
+	@echo "  build-push       - Build image and push to registry"
+	@echo "  build-push-dockerhub - Build image and push tar via git"
 	@echo "  docker-run       - Run Docker container locally"
 	@echo "  compose-up       - Start Docker Compose services"
 	@echo "  compose-down     - Stop Docker Compose services"
@@ -31,16 +31,24 @@ build:
 
 .PHONY: docker-build
 docker-build:
-	docker build -t $(IMAGE) -t $(LATEST_IMAGE) .
+	docker build -t $(IMAGE) .
 
-.PHONY: docker-push
-docker-push: docker-build
+.PHONY: build-push
+build-push: docker-build
 	docker push $(IMAGE)
-	docker push $(LATEST_IMAGE)
+
+.PHONY: build-push-dockerhub
+build-push-dockerhub: docker-build
+	cd ~/sangfor/upload-docker-images/images-zgsm/ && \
+	rm -f * && \
+	docker save -o $(APP_NAME)-$(IMAGE_TAG).tar $(IMAGE) && \
+	git add -A && \
+	git commit -m "feat: add $(APP_NAME)-$(IMAGE_TAG).tar" && \
+	git push origin main
 
 .PHONY: docker-run
 docker-run:
-	docker run -d -p 3000:80 --name $(APP_NAME) $(LATEST_IMAGE)
+	docker run -d -p 3000:80 --name $(APP_NAME) $(IMAGE)
 
 .PHONY: compose-up
 compose-up:
