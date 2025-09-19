@@ -66,6 +66,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="amount" label="Amount" width="100" />
+        <el-table-column prop="expiry_days" label="ExpiryDays" width="100" />
         <!-- Model列暂时隐藏，因为暂时没有实际意义 -->
         <!-- <el-table-column prop="model" label="Model" width="120" /> -->
         <el-table-column prop="status" label="Status" width="100">
@@ -159,6 +160,10 @@
 
         <el-form-item label="Amount" prop="amount">
           <el-input-number v-model="form.amount" :min="1" :max="10000" style="width: 100%" />
+        </el-form-item>
+
+        <el-form-item label="ExpiryDays" prop="expiry_days">
+          <el-input-number v-model="form.expiry_days" :min="1" :max="100000" style="width: 100%" />
         </el-form-item>
 
         <!-- Model字段暂时隐藏，因为暂时没有实际意义 -->
