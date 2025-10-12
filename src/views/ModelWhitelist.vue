@@ -7,84 +7,140 @@
 
     <el-card>
       <el-tabs v-model="activeTab">
-        <el-tab-pane label="Query User Whitelist" name="query">
-          <el-form :inline="true" :model="queryForm" class="section-form">
+        <!-- Combined: Query + Edit User Whitelist -->
+        <el-tab-pane label="User Whitelist" name="user">
+          <!-- Search -->
+          <el-form :inline="true" label-width="160px" label-position="left" class="section-form" @submit.prevent>
             <el-form-item label="User ID (UUID)">
-              <el-input v-model="queryForm.userId" placeholder="Enter user UUID" clearable style="width: 360px" />
+              <el-input
+                v-model.trim="userForm.userId"
+                placeholder="Enter user UUID"
+                clearable
+                style="width: 360px"
+              />
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" :loading="loadingQuery" @click="handleQuery">Query</el-button>
+              <el-button type="primary" :loading="loadingUser" @click="handleUserQuery">Query</el-button>
+              <el-button :disabled="loadingUser" @click="handleUserResetAll">Reset</el-button>
             </el-form-item>
           </el-form>
 
-          <div v-if="queryResult" class="result">
+          <!-- Result + Editor -->
+          <div v-if="hasUserResult" class="result">
             <div class="result-row">
-              <span class="result-label">User:</span>
-              <span class="result-value">{{ queryResult.user_id }}</span>
+              <el-space wrap>
+                <el-tag type="info">Current: {{ originalModels.length }}</el-tag>
+                <el-tag type="success">Added: {{ addedModels.length }}</el-tag>
+                <el-tag type="danger">Removed: {{ removedModels.length }}</el-tag>
+              </el-space>
             </div>
-            <div class="result-row">
-              <span class="result-label">Models:</span>
-              <div class="tags">
-                <el-tag v-for="m in queryResult.models" :key="m" type="info" class="tag">{{ m }}</el-tag>
-                <span v-if="!queryResult.models || queryResult.models.length === 0" class="empty">No models</span>
-              </div>
-            </div>
+
+            <el-form label-width="160px" label-position="left" class="section-form">
+              <el-form-item label="User">
+                <span class="result-value">{{ userForm.userId }}</span>
+              </el-form-item>
+              <el-form-item label="Models">
+                <div class="tags-input">
+                  <el-space wrap>
+                    <el-tag
+                      v-for="m in editModels"
+                      :key="m"
+                      closable
+                      class="tag"
+                      @close="removeModel(m)"
+                    >{{ m }}</el-tag>
+
+                    <el-input
+                      v-model.trim="newModel"
+                      placeholder="Type and press Enter to add"
+                      clearable
+                      class="tag-input"
+                      @keyup.enter="addModel()"
+                      @clear="onClearInput"
+                    />
+                    <el-button type="primary" text @click="addModel">Add</el-button>
+                  </el-space>
+                </div>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" :disabled="!userDirty" :loading="savingUser" @click="handleUserSave">Save</el-button>
+                <el-button :disabled="!userDirty" @click="restoreUserOriginal">Undo</el-button>
+                <el-popconfirm title="Clear all whitelist models for this user?" @confirm="clearUserAll">
+                  <template #reference>
+                    <el-button type="danger" text>Clear All</el-button>
+                  </template>
+                </el-popconfirm>
+              </el-form-item>
+            </el-form>
           </div>
         </el-tab-pane>
 
-        <el-tab-pane label="Set User Whitelist" name="set">
-          <el-form ref="setFormRef" :model="setForm" :rules="setRules" label-width="140px" class="section-form">
-            <el-form-item label="User ID (UUID)" prop="userId">
-              <el-input v-model="setForm.userId" placeholder="Enter user UUID" clearable />
-            </el-form-item>
-            <el-form-item label="Models" prop="models">
-              <el-select v-model="setForm.models" multiple filterable allow-create default-first-option placeholder="Input and press Enter to add" style="width: 100%" />
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" :loading="loadingSet" @click="handleSet">Save</el-button>
-              <el-button @click="resetSetForm">Reset</el-button>
-            </el-form-item>
-          </el-form>
-        </el-tab-pane>
-
-        <el-tab-pane label="Query Department Whitelist" name="queryDept">
-          <el-form :inline="true" :model="queryDeptForm" class="section-form">
+        <!-- Combined: Query + Edit Department Whitelist -->
+        <el-tab-pane label="Department Whitelist" name="department">
+          <!-- Search -->
+          <el-form :inline="true" label-width="160px" label-position="left" class="section-form" @submit.prevent>
             <el-form-item label="Department Name">
-              <el-input v-model="queryDeptForm.departmentName" placeholder="Enter department name" clearable style="width: 360px" />
+              <el-input
+                v-model.trim="deptForm.departmentName"
+                placeholder="Enter department name"
+                clearable
+                style="width: 360px"
+              />
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" :loading="loadingQueryDept" @click="handleQueryDept">Query</el-button>
+              <el-button type="primary" :loading="loadingDept" @click="handleDeptQuery">Query</el-button>
+              <el-button :disabled="loadingDept" @click="handleDeptResetAll">Reset</el-button>
             </el-form-item>
           </el-form>
 
-          <div v-if="queryDeptResult" class="result">
+          <!-- Result + Editor -->
+          <div v-if="hasDeptResult" class="result">
             <div class="result-row">
-              <span class="result-label">Department:</span>
-              <span class="result-value">{{ queryDeptResult.department_name }}</span>
+              <el-space wrap>
+                <el-tag type="info">Current: {{ deptOriginalModels.length }}</el-tag>
+                <el-tag type="success">Added: {{ deptAddedModels.length }}</el-tag>
+                <el-tag type="danger">Removed: {{ deptRemovedModels.length }}</el-tag>
+              </el-space>
             </div>
-            <div class="result-row">
-              <span class="result-label">Models:</span>
-              <div class="tags">
-                <el-tag v-for="m in queryDeptResult.models" :key="m" type="success" class="tag">{{ m }}</el-tag>
-                <span v-if="!queryDeptResult.models || queryDeptResult.models.length === 0" class="empty">No models</span>
-              </div>
-            </div>
+
+            <el-form label-width="160px" label-position="left" class="section-form">
+              <el-form-item label="Department">
+                <span class="result-value">{{ deptForm.departmentName }}</span>
+              </el-form-item>
+              <el-form-item label="Models">
+                <div class="tags-input">
+                  <el-space wrap>
+                    <el-tag
+                      v-for="m in deptEditModels"
+                      :key="m"
+                      closable
+                      class="tag"
+                      @close="removeDeptModel(m)"
+                    >{{ m }}</el-tag>
+
+                    <el-input
+                      v-model.trim="newDeptModel"
+                      placeholder="Type and press Enter to add"
+                      clearable
+                      class="tag-input"
+                      @keyup.enter="addDeptModel()"
+                      @clear="onClearDeptInput"
+                    />
+                    <el-button type="primary" text @click="addDeptModel">Add</el-button>
+                  </el-space>
+                </div>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" :disabled="!deptDirty" :loading="savingDept" @click="handleDeptSave">Save</el-button>
+                <el-button :disabled="!deptDirty" @click="restoreDeptOriginal">Undo</el-button>
+                <el-popconfirm title="Clear all whitelist models for this department?" @confirm="clearDeptAll">
+                  <template #reference>
+                    <el-button type="danger" text>Clear All</el-button>
+                  </template>
+                </el-popconfirm>
+              </el-form-item>
+            </el-form>
           </div>
-        </el-tab-pane>
-
-        <el-tab-pane label="Set Department Whitelist" name="setDept">
-          <el-form ref="setDeptFormRef" :model="setDeptForm" :rules="setDeptRules" label-width="160px" class="section-form">
-            <el-form-item label="Department Name" prop="departmentName">
-              <el-input v-model="setDeptForm.departmentName" placeholder="Enter department name" clearable />
-            </el-form-item>
-            <el-form-item label="Models" prop="models">
-              <el-select v-model="setDeptForm.models" multiple filterable allow-create default-first-option placeholder="Input and press Enter to add" style="width: 100%" />
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" :loading="loadingSetDept" @click="handleSetDept">Save</el-button>
-              <el-button @click="resetSetDeptForm">Reset</el-button>
-            </el-form-item>
-          </el-form>
         </el-tab-pane>
       </el-tabs>
     </el-card>
@@ -92,112 +148,192 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import { modelPermissionApi } from '@/services/api'
 
-const activeTab = ref('query')
+const activeTab = ref('user')
 
-// Query tab
-const queryForm = reactive({ userId: '' })
-const queryResult = ref(null)
-const loadingQuery = ref(false)
+// Combined User Whitelist state
+const userForm = reactive({ userId: '' })
+const loadingUser = ref(false)
+const savingUser = ref(false)
+const hasUserResult = ref(false)
 
-const handleQuery = async () => {
-  if (!queryForm.userId) {
+const originalModels = ref([])
+const editModels = ref([])
+const userDirty = ref(false)
+const newModel = ref('')
+
+const addedModels = computed(() => editModels.value.filter(v => !originalModels.value.includes(v)))
+const removedModels = computed(() => originalModels.value.filter(v => !editModels.value.includes(v)))
+
+function markUserDirty() {
+  userDirty.value = true
+}
+
+function addModel() {
+  const value = (newModel.value || '').trim()
+  if (!value) return
+  if (!editModels.value.includes(value)) {
+    editModels.value.push(value)
+    markUserDirty()
+  }
+  newModel.value = ''
+}
+
+function removeModel(model) {
+  const index = editModels.value.indexOf(model)
+  if (index !== -1) {
+    editModels.value.splice(index, 1)
+    markUserDirty()
+  }
+}
+
+function onClearInput() {
+  newModel.value = ''
+}
+
+async function handleUserQuery() {
+  if (!userForm.userId) {
     ElMessage.warning('Please input user UUID')
     return
   }
+  loadingUser.value = true
   try {
-    loadingQuery.value = true
-    const res = await modelPermissionApi.getUserWhitelist(queryForm.userId)
-    queryResult.value = res.data
+    const res = await modelPermissionApi.getUserWhitelist(userForm.userId)
+    originalModels.value = res.data?.models || []
+    editModels.value = [...originalModels.value]
+    hasUserResult.value = true
+    userDirty.value = false
     ElMessage.success('Fetched successfully')
   } catch (e) {
-    queryResult.value = null
+    hasUserResult.value = false
   } finally {
-    loadingQuery.value = false
+    loadingUser.value = false
   }
 }
 
-// Set tab
-const setFormRef = ref()
-const setForm = reactive({ userId: '', models: [] })
-const loadingSet = ref(false)
-
-const setRules = {
-  userId: [{ required: true, message: 'User UUID is required', trigger: 'blur' }],
-  models: [{ required: true, message: 'Please input at least one model', trigger: 'change' }]
-}
-
-const handleSet = async () => {
+async function handleUserSave() {
+  if (!userDirty.value || !userForm.userId) return
+  savingUser.value = true
   try {
-    await setFormRef.value.validate()
-    loadingSet.value = true
-    await modelPermissionApi.setUserWhitelist(setForm.userId, setForm.models)
+    await modelPermissionApi.setUserWhitelist(userForm.userId, editModels.value)
+    originalModels.value = [...editModels.value]
+    userDirty.value = false
     ElMessage.success('Saved successfully')
-  } catch (e) {
-    // validation or request error already messaged by interceptor
   } finally {
-    loadingSet.value = false
+    savingUser.value = false
   }
 }
 
-const resetSetForm = () => {
-  setForm.userId = ''
-  setForm.models = []
-  setFormRef.value?.clearValidate()
+function restoreUserOriginal() {
+  editModels.value = [...originalModels.value]
+  userDirty.value = false
 }
 
-// Query Department tab
-const queryDeptForm = reactive({ departmentName: '' })
-const queryDeptResult = ref(null)
-const loadingQueryDept = ref(false)
+function clearUserAll() {
+  editModels.value = []
+  userDirty.value = true
+}
 
-const handleQueryDept = async () => {
-  if (!queryDeptForm.departmentName) {
+function handleUserResetAll() {
+  userForm.userId = ''
+  hasUserResult.value = false
+  originalModels.value = []
+  editModels.value = []
+  userDirty.value = false
+}
+
+// Department combined state
+const deptForm = reactive({ departmentName: '' })
+const loadingDept = ref(false)
+const savingDept = ref(false)
+const hasDeptResult = ref(false)
+
+const deptOriginalModels = ref([])
+const deptEditModels = ref([])
+const deptDirty = ref(false)
+const newDeptModel = ref('')
+
+const deptAddedModels = computed(() => deptEditModels.value.filter(v => !deptOriginalModels.value.includes(v)))
+const deptRemovedModels = computed(() => deptOriginalModels.value.filter(v => !deptEditModels.value.includes(v)))
+
+function markDeptDirty() {
+  deptDirty.value = true
+}
+
+function addDeptModel() {
+  const value = (newDeptModel.value || '').trim()
+  if (!value) return
+  if (!deptEditModels.value.includes(value)) {
+    deptEditModels.value.push(value)
+    markDeptDirty()
+  }
+  newDeptModel.value = ''
+}
+
+function removeDeptModel(model) {
+  const index = deptEditModels.value.indexOf(model)
+  if (index !== -1) {
+    deptEditModels.value.splice(index, 1)
+    markDeptDirty()
+  }
+}
+
+function onClearDeptInput() {
+  newDeptModel.value = ''
+}
+
+async function handleDeptQuery() {
+  if (!deptForm.departmentName) {
     ElMessage.warning('Please input department name')
     return
   }
+  loadingDept.value = true
   try {
-    loadingQueryDept.value = true
-    const res = await modelPermissionApi.getDepartmentWhitelist(queryDeptForm.departmentName)
-    queryDeptResult.value = res.data
+    const res = await modelPermissionApi.getDepartmentWhitelist(deptForm.departmentName)
+    deptOriginalModels.value = res.data?.models || []
+    deptEditModels.value = [...deptOriginalModels.value]
+    hasDeptResult.value = true
+    deptDirty.value = false
     ElMessage.success('Fetched successfully')
   } catch (e) {
-    queryDeptResult.value = null
+    hasDeptResult.value = false
   } finally {
-    loadingQueryDept.value = false
+    loadingDept.value = false
   }
 }
 
-// Set Department tab
-const setDeptFormRef = ref()
-const setDeptForm = reactive({ departmentName: '', models: [] })
-const loadingSetDept = ref(false)
-
-const setDeptRules = {
-  departmentName: [{ required: true, message: 'Department name is required', trigger: 'blur' }],
-  models: [{ required: true, message: 'Please input at least one model', trigger: 'change' }]
-}
-
-const handleSetDept = async () => {
+async function handleDeptSave() {
+  if (!deptDirty.value || !deptForm.departmentName) return
+  savingDept.value = true
   try {
-    await setDeptFormRef.value.validate()
-    loadingSetDept.value = true
-    await modelPermissionApi.setDepartmentWhitelist(setDeptForm.departmentName, setDeptForm.models)
+    await modelPermissionApi.setDepartmentWhitelist(deptForm.departmentName, deptEditModels.value)
+    deptOriginalModels.value = [...deptEditModels.value]
+    deptDirty.value = false
     ElMessage.success('Saved successfully')
-  } catch (e) {
-    // errors handled by interceptor
   } finally {
-    loadingSetDept.value = false
+    savingDept.value = false
   }
 }
 
-const resetSetDeptForm = () => {
-  setDeptForm.departmentName = ''
-  setDeptForm.models = []
-  setDeptFormRef.value?.clearValidate()
+function restoreDeptOriginal() {
+  deptEditModels.value = [...deptOriginalModels.value]
+  deptDirty.value = false
+}
+
+function clearDeptAll() {
+  deptEditModels.value = []
+  deptDirty.value = true
+}
+
+function handleDeptResetAll() {
+  deptForm.departmentName = ''
+  hasDeptResult.value = false
+  deptOriginalModels.value = []
+  deptEditModels.value = []
+  deptDirty.value = false
 }
 </script>
 
@@ -244,9 +380,24 @@ const resetSetDeptForm = () => {
 .tag {
   margin-right: 6px;
 }
+.tags-input {
+  width: 100%;
+}
+.tag-input :deep(.el-input__wrapper) {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+.section-form :deep(.el-form-item__label) {
+  white-space: nowrap;
+  text-align: left;
+}
 .empty {
   color: #909399;
 }
 </style>
+
+
+
+
 
 

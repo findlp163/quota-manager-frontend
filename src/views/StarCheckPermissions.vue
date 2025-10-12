@@ -7,78 +7,64 @@
 
     <el-card>
       <el-tabs v-model="activeTab">
-        <el-tab-pane label="Query User Setting" name="queryUser">
-          <el-form :inline="true" :model="queryUserForm" class="section-form">
+        <!-- Combined: User Setting -->
+        <el-tab-pane label="User Setting" name="user">
+          <!-- Search -->
+          <el-form :inline="true" label-width="160px" label-position="left" class="section-form" @submit.prevent>
             <el-form-item label="User ID (UUID)">
-              <el-input v-model="queryUserForm.userId" placeholder="Enter user UUID" clearable style="width: 360px" />
+              <el-input v-model.trim="userForm.userId" placeholder="Enter user UUID" clearable style="width: 360px" />
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" :loading="loadingQueryUser" @click="handleQueryUser">Query</el-button>
+              <el-button type="primary" :loading="loadingUser" @click="handleUserQuery">Query</el-button>
+              <el-button :disabled="loadingUser" @click="handleUserResetAll">Reset</el-button>
             </el-form-item>
           </el-form>
 
-          <div v-if="queryUserResult" class="result">
-            <div class="result-row">
-              <span class="result-label">User:</span>
-              <span class="result-value">{{ queryUserResult.user_id }}</span>
-            </div>
-            <div class="result-row">
-              <span class="result-label">Enabled:</span>
-              <el-tag :type="queryUserResult.enabled ? 'success' : 'warning'">{{ queryUserResult.enabled ? 'true' : 'false' }}</el-tag>
-            </div>
+          <!-- Result + Editor -->
+          <div v-if="hasUserResult" class="result">
+            <el-form label-width="160px" label-position="left" class="section-form">
+              <el-form-item label="User">
+                <span class="result-value">{{ userForm.userId }}</span>
+              </el-form-item>
+              <el-form-item label="Enabled">
+                <el-switch v-model="editUserEnabled" @change="markUserDirty" />
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" :disabled="!userDirty" :loading="savingUser" @click="handleUserSave">Save</el-button>
+                <el-button :disabled="!userDirty" @click="restoreUserOriginal">Undo</el-button>
+              </el-form-item>
+            </el-form>
           </div>
         </el-tab-pane>
 
-        <el-tab-pane label="Set User Setting" name="setUser">
-          <el-form ref="setUserFormRef" :model="setUserForm" :rules="setUserRules" label-width="160px" class="section-form">
-            <el-form-item label="User ID (UUID)" prop="userId">
-              <el-input v-model="setUserForm.userId" placeholder="Enter user UUID" clearable />
-            </el-form-item>
-            <el-form-item label="Enabled" prop="enabled">
-              <el-switch v-model="setUserForm.enabled" />
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" :loading="loadingSetUser" @click="handleSetUser">Save</el-button>
-              <el-button @click="resetSetUser">Reset</el-button>
-            </el-form-item>
-          </el-form>
-        </el-tab-pane>
-
-        <el-tab-pane label="Query Department Setting" name="queryDept">
-          <el-form :inline="true" :model="queryDeptForm" class="section-form">
+        <!-- Combined: Department Setting -->
+        <el-tab-pane label="Department Setting" name="department">
+          <!-- Search -->
+          <el-form :inline="true" label-width="160px" label-position="left" class="section-form" @submit.prevent>
             <el-form-item label="Department Name">
-              <el-input v-model="queryDeptForm.departmentName" placeholder="Enter department name" clearable style="width: 360px" />
+              <el-input v-model.trim="deptForm.departmentName" placeholder="Enter department name" clearable style="width: 360px" />
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" :loading="loadingQueryDept" @click="handleQueryDept">Query</el-button>
+              <el-button type="primary" :loading="loadingDept" @click="handleDeptQuery">Query</el-button>
+              <el-button :disabled="loadingDept" @click="handleDeptResetAll">Reset</el-button>
             </el-form-item>
           </el-form>
 
-          <div v-if="queryDeptResult" class="result">
-            <div class="result-row">
-              <span class="result-label">Department:</span>
-              <span class="result-value">{{ queryDeptResult.department_name }}</span>
-            </div>
-            <div class="result-row">
-              <span class="result-label">Enabled:</span>
-              <el-tag :type="queryDeptResult.enabled ? 'success' : 'warning'">{{ queryDeptResult.enabled ? 'true' : 'false' }}</el-tag>
-            </div>
+          <!-- Result + Editor -->
+          <div v-if="hasDeptResult" class="result">
+            <el-form label-width="160px" label-position="left" class="section-form">
+              <el-form-item label="Department">
+                <span class="result-value">{{ deptForm.departmentName }}</span>
+              </el-form-item>
+              <el-form-item label="Enabled">
+                <el-switch v-model="editDeptEnabled" @change="markDeptDirty" />
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" :disabled="!deptDirty" :loading="savingDept" @click="handleDeptSave">Save</el-button>
+                <el-button :disabled="!deptDirty" @click="restoreDeptOriginal">Undo</el-button>
+              </el-form-item>
+            </el-form>
           </div>
-        </el-tab-pane>
-
-        <el-tab-pane label="Set Department Setting" name="setDept">
-          <el-form ref="setDeptFormRef" :model="setDeptForm" :rules="setDeptRules" label-width="160px" class="section-form">
-            <el-form-item label="Department Name" prop="departmentName">
-              <el-input v-model="setDeptForm.departmentName" placeholder="Enter department name" clearable />
-            </el-form-item>
-            <el-form-item label="Enabled" prop="enabled">
-              <el-switch v-model="setDeptForm.enabled" />
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" :loading="loadingSetDept" @click="handleSetDept">Save</el-button>
-              <el-button @click="resetSetDept">Reset</el-button>
-            </el-form-item>
-          </el-form>
         </el-tab-pane>
       </el-tabs>
     </el-card>
@@ -90,96 +76,124 @@ import { ref, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
 import { starCheckPermissionApi } from '@/services/api'
 
-const activeTab = ref('queryUser')
+const activeTab = ref('user')
 
-// Query user
-const queryUserForm = reactive({ userId: '' })
-const queryUserResult = ref(null)
-const loadingQueryUser = ref(false)
-const handleQueryUser = async () => {
-  if (!queryUserForm.userId) {
+// User combined state
+const userForm = reactive({ userId: '' })
+const loadingUser = ref(false)
+const savingUser = ref(false)
+const hasUserResult = ref(false)
+const editUserEnabled = ref(false)
+const originalUserEnabled = ref(false)
+const userDirty = ref(false)
+
+function markUserDirty() {
+  userDirty.value = true
+}
+
+async function handleUserQuery() {
+  if (!userForm.userId) {
     ElMessage.warning('Please input user UUID')
     return
   }
+  loadingUser.value = true
   try {
-    loadingQueryUser.value = true
-    const res = await starCheckPermissionApi.getUserStarCheckSetting(queryUserForm.userId)
-    queryUserResult.value = res.data
+    const res = await starCheckPermissionApi.getUserStarCheckSetting(userForm.userId)
+    originalUserEnabled.value = !!res.data?.enabled
+    editUserEnabled.value = originalUserEnabled.value
+    hasUserResult.value = true
+    userDirty.value = false
     ElMessage.success('Fetched successfully')
   } catch (e) {
-    queryUserResult.value = null
+    hasUserResult.value = false
   } finally {
-    loadingQueryUser.value = false
+    loadingUser.value = false
   }
 }
 
-// Set user
-const setUserFormRef = ref()
-const setUserForm = reactive({ userId: '', enabled: false })
-const loadingSetUser = ref(false)
-const setUserRules = {
-  userId: [{ required: true, message: 'User UUID is required', trigger: 'blur' }]
-}
-const handleSetUser = async () => {
+async function handleUserSave() {
+  if (!userDirty.value || !userForm.userId) return
+  savingUser.value = true
   try {
-    await setUserFormRef.value.validate()
-    loadingSetUser.value = true
-    await starCheckPermissionApi.setUserStarCheckSetting(setUserForm.userId, setUserForm.enabled)
+    await starCheckPermissionApi.setUserStarCheckSetting(userForm.userId, editUserEnabled.value)
+    originalUserEnabled.value = editUserEnabled.value
+    userDirty.value = false
     ElMessage.success('Saved successfully')
-  } catch (e) {
   } finally {
-    loadingSetUser.value = false
+    savingUser.value = false
   }
 }
-const resetSetUser = () => {
-  setUserForm.userId = ''
-  setUserForm.enabled = false
-  setUserFormRef.value?.clearValidate()
+
+function restoreUserOriginal() {
+  editUserEnabled.value = originalUserEnabled.value
+  userDirty.value = false
 }
 
-// Query department
-const queryDeptForm = reactive({ departmentName: '' })
-const queryDeptResult = ref(null)
-const loadingQueryDept = ref(false)
-const handleQueryDept = async () => {
-  if (!queryDeptForm.departmentName) {
+function handleUserResetAll() {
+  userForm.userId = ''
+  hasUserResult.value = false
+  editUserEnabled.value = false
+  originalUserEnabled.value = false
+  userDirty.value = false
+}
+
+// Department combined state
+const deptForm = reactive({ departmentName: '' })
+const loadingDept = ref(false)
+const savingDept = ref(false)
+const hasDeptResult = ref(false)
+const editDeptEnabled = ref(false)
+const originalDeptEnabled = ref(false)
+const deptDirty = ref(false)
+
+function markDeptDirty() {
+  deptDirty.value = true
+}
+
+async function handleDeptQuery() {
+  if (!deptForm.departmentName) {
     ElMessage.warning('Please input department name')
     return
   }
+  loadingDept.value = true
   try {
-    loadingQueryDept.value = true
-    const res = await starCheckPermissionApi.getDepartmentStarCheckSetting(queryDeptForm.departmentName)
-    queryDeptResult.value = res.data
+    const res = await starCheckPermissionApi.getDepartmentStarCheckSetting(deptForm.departmentName)
+    originalDeptEnabled.value = !!res.data?.enabled
+    editDeptEnabled.value = originalDeptEnabled.value
+    hasDeptResult.value = true
+    deptDirty.value = false
     ElMessage.success('Fetched successfully')
   } catch (e) {
-    queryDeptResult.value = null
+    hasDeptResult.value = false
   } finally {
-    loadingQueryDept.value = false
+    loadingDept.value = false
   }
 }
 
-// Set department
-const setDeptFormRef = ref()
-const setDeptForm = reactive({ departmentName: '', enabled: false })
-const loadingSetDept = ref(false)
-const setDeptRules = {
-  departmentName: [{ required: true, message: 'Department name is required', trigger: 'blur' }]
-}
-const handleSetDept = async () => {
+async function handleDeptSave() {
+  if (!deptDirty.value || !deptForm.departmentName) return
+  savingDept.value = true
   try {
-    await setDeptFormRef.value.validate()
-    loadingSetDept.value = true
-    await starCheckPermissionApi.setDepartmentStarCheckSetting(setDeptForm.departmentName, setDeptForm.enabled)
+    await starCheckPermissionApi.setDepartmentStarCheckSetting(deptForm.departmentName, editDeptEnabled.value)
+    originalDeptEnabled.value = editDeptEnabled.value
+    deptDirty.value = false
     ElMessage.success('Saved successfully')
-  } catch (e) {
   } finally {
-    loadingSetDept.value = false
+    savingDept.value = false
   }
 }
-const resetSetDept = () => {
-  setDeptForm.departmentName = ''
-  setDeptForm.enabled = false
-  setDeptFormRef.value?.clearValidate()
+
+function restoreDeptOriginal() {
+  editDeptEnabled.value = originalDeptEnabled.value
+  deptDirty.value = false
+}
+
+function handleDeptResetAll() {
+  deptForm.departmentName = ''
+  hasDeptResult.value = false
+  editDeptEnabled.value = false
+  originalDeptEnabled.value = false
+  deptDirty.value = false
 }
 </script>
 
@@ -194,5 +208,6 @@ const resetSetDept = () => {
 .result-label { width: 140px; color: #606266; }
 .result-value { color: #303133; }
 </style>
+
 
 
