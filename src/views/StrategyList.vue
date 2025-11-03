@@ -25,6 +25,7 @@
             :prefix-icon="Search"
             clearable
             @input="handleSearch"
+            @keyup.enter="handleEnterKey"
           />
         </el-col>
         <el-col :span="6">
@@ -512,8 +513,23 @@ const loadStrategies = async () => {
   }
 }
 
-const handleSearch = () => {
-  // 搜索是实时的，由计算属性处理
+// 防抖函数
+const debounce = (func, delay) => {
+  let timeoutId
+  return function (...args) {
+    clearTimeout(timeoutId)
+    timeoutId = setTimeout(() => func.apply(this, args), delay)
+  }
+}
+
+const handleSearch = debounce(() => {
+  // 每次搜索都重新加载策略列表，从后端获取搜索结果
+  loadStrategies()
+}, 500) // 500毫秒的防抖延迟
+
+const handleEnterKey = () => {
+  // 每次回车都重新加载策略列表，从后端获取搜索结果
+  loadStrategies()
 }
 
 const showCreateDialog = () => {
@@ -522,7 +538,17 @@ const showCreateDialog = () => {
   dialogVisible.value = true
 }
 
-const editStrategy = (strategy) => {
+const editStrategy = async (cacheStrategy) => {
+  let strategy
+  try {
+    // 先获取最新数据
+    const response = await strategyApi.getStrategy(cacheStrategy.id)
+    strategy = response.data
+  } catch (error) {
+    ElMessage.error('Failed to load strategy details for editing')
+    return
+  }
+  
   isEditing.value = true
   Object.assign(form, strategy)
 
