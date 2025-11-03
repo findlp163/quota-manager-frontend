@@ -34,6 +34,7 @@
               </el-tag>
             </el-descriptions-item>
             <el-descriptions-item label="Amount">{{ strategy.amount }}</el-descriptions-item>
+            <el-descriptions-item label="ExpiryDays">{{ strategy.expiry_days }}</el-descriptions-item>
             <el-descriptions-item label="Model">{{ strategy.model || 'N/A' }}</el-descriptions-item>
             <el-descriptions-item label="Maximum Execution Count" v-if="strategy.type === 'periodic'">
               {{ strategy.max_exec_per_user ?? 'N/A' }}
