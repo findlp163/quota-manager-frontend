@@ -497,6 +497,14 @@ const filteredStrategies = computed(() => {
     result = result.filter(strategy => strategy.type === typeFilter.value)
   }
 
+  // 固定按ID倒序排序
+  result = result.sort((a, b) => {
+    // 确保ID是数字类型进行比较
+    const idA = parseInt(a.id, 10)
+    const idB = parseInt(b.id, 10)
+    return idB - idA
+  })
+
   return result
 })
 
